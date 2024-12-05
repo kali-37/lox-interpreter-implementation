@@ -1,16 +1,11 @@
 import argparse
 import os
 from argparse import Namespace
-from enum import IntEnum
 
+from app.config import ExitCode
 from app.logger import logger
 from app.scanner import EOF_INDICATOR
 from app.scanner import scan_token
-
-
-class ExitStatus(IntEnum):
-    SUCESS = 0
-    FAILURE = 1
 
 
 def parse_argument():
@@ -29,17 +24,20 @@ def main(args: Namespace):
 
     if args.tokenize != "tokenize":
         logger.warning(f"Unknown command: {args.tokenize}")
-        exit(ExitStatus.FAILURE)
+        exit(ExitCode.FAILURE)
 
     if not os.path.exists(args.filename):
         logger.error("File Dosen't exists")
-        exit(ExitStatus.FAILURE)
+        exit(ExitCode.FAILURE)
 
     with open(args.filename) as file:
-        file_contents = file.read()
+        file_contents = file.readlines()
     if file_contents:
-        for lexeme in scan_token(file_contents):
+        scan_status = scan_token(file_contents)
+        for lexeme in scan_status[0]:
             print(lexeme)
+        if scan_status[1]: 
+            exit(scan_status[1])
 
     else:
         # logger.info(EOF_INDICATOR)
