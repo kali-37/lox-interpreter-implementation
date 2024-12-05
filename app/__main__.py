@@ -4,10 +4,14 @@ from argparse import Namespace
 from enum import IntEnum
 
 from app.logger import logger
+from app.scanner import EOF_INDICATOR
+from app.scanner import scan_token
+
 
 class ExitStatus(IntEnum):
     SUCESS = 0
     FAILURE = 1
+
 
 def parse_argument():
     parser = argparse.ArgumentParser(
@@ -18,6 +22,7 @@ def parse_argument():
     parser.add_argument("filename", type=str, help="filename required")
     args = parser.parse_args()
     return args
+
 
 def main(args: Namespace):
     logger.debug("Logs from your program will appear here!")
@@ -33,9 +38,13 @@ def main(args: Namespace):
     with open(args.filename) as file:
         file_contents = file.read()
     if file_contents:
-        raise NotImplementedError("Scanner not implemented")
+        for lexeme in scan_token(file_contents):
+            print(lexeme)
+
     else:
-        logger.warning("EOF is Null")
+        # logger.info(EOF_INDICATOR)
+        print(EOF_INDICATOR)
+
 
 if __name__ == "__main__":
     main(parse_argument())
