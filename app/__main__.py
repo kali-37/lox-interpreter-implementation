@@ -36,7 +36,7 @@ def main(args: Namespace):
         scan_status = scan_token(file_contents)
         for lexeme in scan_status[0]:
             print(lexeme)
-        if scan_status[1]: 
+        if scan_status[1]:
             exit(scan_status[1])
 
     else:
