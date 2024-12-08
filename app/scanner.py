@@ -1,85 +1,89 @@
-import sys
-from typing import Dict
-from typing import List
-from typing import Optional
-from typing import Set
-from typing import Tuple
+from typing import List, Optional, Tuple
 
-from app.config import ExitCode
-
-EOF_INDICATOR = "EOF  null"
-equal_sign_preceeder: Set[str] = {"=", "!", ">", "<"}
-ignore_characters: Set[str] = {" ", "\t", "\n"}
+from app.config import ExitCode, character_tokens, equal_sign_preceeder
+from app.error import LogError
+from app.tokens import Token, TokenType, ignore_tokens
 
 
-character_tokens: Dict[str, str] = {
-    "(": "LEFT_PAREN",
-    ")": "RIGHT_PAREN",
-    "{": "LEFT_BRACE",
-    "}": "RIGHT_BRACE",
-    "*": "STAR",
-    ".": "DOT",
-    ",": "COMMA",
-    "+": "PLUS",
-    "-": "MINUS",
-    "*": "STAR",
-    "==": "EQUAL_EQUAL",
-    "=": "EQUAL",
-    ";": "SEMICOLON",
-    "!": "BANG",
-    "!=": "BANG_EQUAL",
-    "<": "LESS",
-    ">": "GREATER",
-    "<=": "LESS_EQUAL",
-    ">=": "GREATER_EQUAL",
-    "/": "SLASH",
-    "*": "STAR",
-}
+class Scanner:
+    def __init__(self, source: List[str], column: int = 0, row: int = 0):
+        self.source = source
+        self.current_line: str = ""
+        self.column: int = column
+        self.row: int = row
+        self.tokens: list[Token] = []
+        self.exit_status = ExitCode.SUCCESS
 
+    def is_not_end_column(self, column: Optional[int] = None) -> bool:
+        if column:
+            return column < len(self.source)
+        return self.column < len(self.source)
 
-def scan_token(content: List[str]) -> Tuple[List[str], Optional[int]]:
-    result: List[str] = []
-    exit_status: Optional[ExitCode] = None
-    line_no: int = 0
-    while line_no < len(content):
-        line = content[line_no]
-        column_no: int = 0
-        while column_no < len(line):
-            token_symbol = line[column_no]
-            token_name: Optional[str] = character_tokens.get(
-                token_symbol, None
-            )
+    def is_not_end_row(self, row: Optional[int] = None) -> bool:
+        if row:
+            return row < len(self.current_line)
+        return self.row < len(self.current_line)
 
-            if not token_name:
-                # logging.error(f"[line {line_no+1}] Error: Unexpected character: {token_symbol}")
-                if token_symbol not in ignore_characters:
-                    print(
-                        f"[line {line_no+1}] Error: Unexpected character: {token_symbol}",
-                        file=sys.stderr,
+    def is_ignore_character(self) -> bool:
+        return self.current_line[self.row] in ignore_tokens
+
+    def get_token_name(self, token_symbol: str) -> Optional[str]:
+        return (
+            TokenType(token_symbol).name
+            if TokenType.has_token_symbol(token_symbol)
+            else None
+        )
+
+    def validate_ignoreable_token(self, token_symbol: str) -> None:
+        if not self.is_ignore_character():
+            LogError(self.column, token_symbol).display_error()
+            self.exit_status = ExitCode.EX_DATAERR
+
+    def is_comment_signature(self, token_symbol: str):
+        return (
+            token_symbol == "/"
+            and self.is_not_end_row(self.row + 1)
+            and self.current_line[self.row + 1] == "/"
+        )
+
+    def is_equal_sign_preceeder(self, token_symbol: str) -> bool:
+        return (
+            (token_symbol in equal_sign_preceeder)
+            and self.is_not_end_row(self.row + 1)
+            and self.current_line[self.row + 1] == "="
+        )
+
+    def scan_tokens(self) -> Tuple[List[Token], ExitCode]:
+        while self.is_not_end_column():
+            self.current_line = self.source[self.column]
+            while self.is_not_end_row():
+                token_symbol = self.current_line[self.row]
+                token_name: Optional[str] = self.get_token_name(token_symbol)
+                if not token_name:
+                    self.validate_ignoreable_token(token_symbol)
+                else:
+                    if self.is_equal_sign_preceeder(token_symbol):
+                        token_symbol += "="
+                        token_name = character_tokens.get(token_symbol)
+                        self.row += 1
+
+                    # Break the current line on encountering a comment flow
+                    if self.is_comment_signature(token_symbol):
+                        break
+                    self.tokens.append(
+                        Token(TokenType(token_symbol).name, token_symbol, None)
                     )
-                    exit_status = ExitCode.EX_DATAERR
+                self.row += 1
+            self.column += 1
+            self.row = 0
+        self.tokens.append(Token(TokenType("").name, "", None))
+        return self.tokens, self.exit_status
 
-            else:
-                # Case : comparison operation preceding (=) sign
-                if (
-                    (token_symbol in equal_sign_preceeder)
-                    and column_no + 1 < len(line)
-                    and line[column_no + 1] == "="
-                ):
-                    token_symbol += "="
-                    token_name = character_tokens.get(token_symbol)
-                    column_no += 1
 
-                # Break the current line on encountering a comment flow
-                if (
-                    token_symbol == "/"
-                    and column_no + 1 < len(line)
-                    and line[column_no + 1] == "/"
-                ):
-                    break
+# EOF  null
+# EOF  null
+# EOF  null
 
-                result.append(f"{token_name} {token_symbol} null")
-            column_no += 1
-        line_no += 1
-    result.append(EOF_INDICATOR)
-    return result, exit_status
+# "EOF  null"
+# "EOF   null"
+# "EOF  null"

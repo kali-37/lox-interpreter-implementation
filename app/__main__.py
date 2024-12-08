@@ -1,11 +1,12 @@
 import argparse
 import os
 from argparse import Namespace
+from typing import List, Tuple
 
 from app.config import ExitCode
 from app.logger import logger
-from app.scanner import EOF_INDICATOR
-from app.scanner import scan_token
+from app.scanner import Scanner
+from app.token import Token, TokenType
 
 
 def parse_argument():
@@ -33,15 +34,16 @@ def main(args: Namespace):
     with open(args.filename) as file:
         file_contents = file.readlines()
     if file_contents:
-        scan_status = scan_token(file_contents)
+        obj = Scanner(file_contents)
+        scan_status: Tuple[List[Token], ExitCode] = obj.scan_tokens()
         for lexeme in scan_status[0]:
             print(lexeme)
         if scan_status[1]:
-            exit(scan_status[1])
+            exit(scan_status[1].value)
 
     else:
         # logger.info(EOF_INDICATOR)
-        print(EOF_INDICATOR)
+        print(Token(TokenType("").name, "", None))
 
 
 if __name__ == "__main__":
