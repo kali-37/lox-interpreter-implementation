@@ -1,8 +1,10 @@
 from enum import Enum
-from typing import Dict, Optional, Set
+from typing import Optional
+from typing import Set
 
 equal_sign_preceeder: Set[str] = {"=", "!", ">", "<"}
 ignore_tokens: Set[str] = {" ", "\t", "\n"}
+string_literals: Set[str] = {'"'}
 
 
 class TokenType(Enum):
@@ -18,23 +20,31 @@ class TokenType(Enum):
     SLASH = "/"
     STAR = "*"
     BANG = "!"
-    BANG_EQUAL = "!="
     EQUAL = "="
-    EQUAL_EQUAL = "=="
     GREATER = ">"
-    GREATER_EQUAL = ">="
     LESS = "<"
+
+    # multi character tokens
+    BANG_EQUAL = "!="
+    EQUAL_EQUAL = "=="
+    GREATER_EQUAL = ">="
     LESS_EQUAL = "<="
+
+    # String literals
+    STRING = '"'  # STRING starts with <"> character so,
+    NUMBER = (0, 1, 2, 4, 5, 6, 7, 8, 9)
+
+    # Identifiers
+    IDENTIFIER= "IDENTIFIER"
+
     EOF = ""
 
     @classmethod
     def has_token_symbol(cls, token_symbol: str) -> bool:
-        # Check if token_symbol exists in the enum values
         return token_symbol in cls._value2member_map_
 
     @classmethod
     def get_token_name(cls, token_symbol: str) -> Optional[str]:
-        # If the token symbol exists, return its name
         if cls.has_token_symbol(token_symbol):
             return cls(token_symbol).name
         return None

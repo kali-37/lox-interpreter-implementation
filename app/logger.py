@@ -1,6 +1,7 @@
 import logging
 import sys
-from logging import LogRecord, StreamHandler
+from logging import LogRecord
+from logging import StreamHandler
 
 
 class ColorFormatter(logging.Formatter):

@@ -8,11 +8,20 @@ class LogError:
         self.error_column = error_column
         self.token_symbol = token_symbol
 
-    def display_error(self):
+    def display_token_error(self):
         print(
             f"[line {self.error_column+1}] Error: Unexpected character: {self.token_symbol}",
             file=sys.stderr,
         )
         # logging.error(
         # f"[line {self.error_column+1}] Error: Unexpected character: {self.token_symbol}",
+        # )
+
+    def display_literal_error(self):
+        print(
+            f"[line {self.error_column+1}] Error: Unterminated string.",
+            file=sys.stderr,
+        )
+        # logging.error(
+        # f"[line {self.error_column+1}] Error: Unterminated string.",
         # )

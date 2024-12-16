@@ -1,12 +1,14 @@
 import argparse
 import os
 from argparse import Namespace
-from typing import List, Tuple
+from typing import List
+from typing import Tuple
 
 from app.config import ExitCode
 from app.logger import logger
 from app.scanner import Scanner
-from app.token import Token, TokenType
+from app.tokens import Token
+from app.tokens import TokenType
 
 
 def parse_argument():
