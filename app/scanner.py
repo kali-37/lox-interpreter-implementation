@@ -8,6 +8,9 @@ from app.tokens import string_literals
 from typing import List, Optional, Tuple
 
 
+ESCAPE_SEQUENCE = [r"\s", "\t", "\n"]
+
+
 class Stack:
     def __init__(
         self, boundary_capturer: List[str] = [], buffer: str = ""
@@ -71,10 +74,12 @@ class Scanner:
             else None
         )
 
-    def validate_ignoreable_token(self, token_symbol: str) -> None:
+    def validate_ignoreable_token(self, token_symbol: str) -> bool:
         if not self.is_ignore_character():
             LogError(self.column, token_symbol).display_token_error()
             self.exit_status = ExitCode.EX_DATAERR
+            return True
+        return False
 
     def is_comment_signature(self, token_symbol: str):
         return (
@@ -161,28 +166,63 @@ class Scanner:
             stack_elem, TokenType.NUMBER.name, str(float(stack.inner_elements))
         )
 
+    def handel_identifiers(self, token_symbol: str) -> None:
+        identifier = ""
+        while True:
+            if (
+                self.is_not_end_row(self.row + 1)
+                and (token_symbol.isalnum() or token_symbol == "_")
+                and token_symbol not in ignore_tokens
+            ):
+                identifier += token_symbol
+                self.row += 1
+                token_symbol = self.current_line[self.row]
+            else:
+                break
+
+        if not self.is_not_end_row(self.row + 1) and (
+            token_symbol.isalnum() or token_symbol == "_"
+        ):
+            identifier += token_symbol
+        else:
+            self.row -= 1
+        return self.include_scanned_tokens(
+            identifier,
+            TokenType.IDENTIFIER.name,
+            "null",
+        )
+
     def enquire_token_type(self, token_symbol: str) -> None:
         token_name = ""
         if token_symbol in string_literals:
             return self.handel_string_literals(token_symbol)
 
-        if self.is_equal_sign_preceeder(token_symbol):
+        elif self.is_equal_sign_preceeder(token_symbol):
             token_symbol += "="
             token_name = TokenType(token_symbol).name
             self.row += 1
 
-        if token_symbol.isdigit():
+
+        elif token_symbol.isdigit():
             return self.handel_numeric_literals(token_symbol)
+
+        elif token_symbol.isalpha() or token_symbol == "_":
+            return self.handel_identifiers(token_symbol)
+
+        elif not TokenType.has_token_symbol(token_symbol):
+            self.validate_ignoreable_token(token_symbol)
+            return 
 
         self.include_scanned_tokens(token_symbol, token_name, None)
 
     def scan_individual_line(self) -> None:
         while self.is_not_end_row():
             token_symbol = self.current_line[self.row]
-            token_name: Optional[str] = self.get_token_name(token_symbol)
             # Check if the token is an ignoreable character
-            if not token_name and not token_symbol.isdigit():
-                self.validate_ignoreable_token(token_symbol)
+            if token_symbol in ignore_tokens:
+                pass
+            # if not token_name and not token_symbol.isdigit():
+            # self.validate_ignoreable_token(token_symbol)
             # Break the current line on encountering a comment signature
             elif self.is_comment_signature(token_symbol):
                 break

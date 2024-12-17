@@ -31,11 +31,11 @@ class TokenType(Enum):
     LESS_EQUAL = "<="
 
     # String literals
-    STRING = '"'  # STRING starts with <"> character so,
+    STRING =  "nan" # STRING starts with <"> character so,
     NUMBER = (0, 1, 2, 4, 5, 6, 7, 8, 9)
 
     # Identifiers
-    IDENTIFIER= "IDENTIFIER"
+    IDENTIFIER = "null"
 
     EOF = ""
 
