@@ -1,6 +1,6 @@
 from app.config import ExitCode
 from app.error import LogError
-from app.tokens import Token
+from app.tokens import KEYWORDS, Token
 from app.tokens import TokenType
 from app.tokens import equal_sign_preceeder
 from app.tokens import ignore_tokens
@@ -167,6 +167,7 @@ class Scanner:
         )
 
     def handel_identifiers(self, token_symbol: str) -> None:
+        """ IT handels identifiers and also the keywords  as they are related """
         identifier = ""
         while True:
             if (
@@ -186,9 +187,12 @@ class Scanner:
             identifier += token_symbol
         else:
             self.row -= 1
+        token_name=TokenType.IDENTIFIER.name
+        if identifier in KEYWORDS.keys():
+            token_name = KEYWORDS[identifier].name
         return self.include_scanned_tokens(
             identifier,
-            TokenType.IDENTIFIER.name,
+            token_name,
             "null",
         )
 

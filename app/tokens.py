@@ -31,13 +31,30 @@ class TokenType(Enum):
     LESS_EQUAL = "<="
 
     # String literals
-    STRING =  "nan" # STRING starts with <"> character so,
+    STRING = "nan"  # STRING starts with <"> character so,
     NUMBER = (0, 1, 2, 4, 5, 6, 7, 8, 9)
 
     # Identifiers
     IDENTIFIER = "null"
 
     EOF = ""
+
+    AND = "and"
+    CLASS = "class"
+    ELSE = "else"
+    FALSE = "false"
+    FUN = "fun"
+    FOR = "for"
+    IF = "if"
+    NIL = "nil"
+    OR = "or"
+    PRINT = "print"
+    RETURN = "return"
+    SUPER = "super"
+    THIS = "this"
+    TRUE = "true"
+    VAR = "var"
+    WHILE = "while"
 
     @classmethod
     def has_token_symbol(cls, token_symbol: str) -> bool:
@@ -66,3 +83,23 @@ class Token:
 
     def __repr__(self) -> str:
         return self.__str__()
+
+
+KEYWORDS = {
+    "and": TokenType.AND,
+    "class": TokenType.CLASS,
+    "else": TokenType.ELSE,
+    "false": TokenType.FALSE,
+    "fun": TokenType.FUN,
+    "for": TokenType.FOR,
+    "if": TokenType.IF,
+    "nil": TokenType.NIL,
+    "or": TokenType.OR,
+    "print": TokenType.PRINT,
+    "return": TokenType.RETURN,
+    "super": TokenType.SUPER,
+    "this": TokenType.THIS,
+    "true": TokenType.TRUE,
+    "var": TokenType.VAR,
+    "while": TokenType.WHILE,
+}
