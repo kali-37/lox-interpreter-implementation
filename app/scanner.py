@@ -5,7 +5,7 @@ from app.tokens import TokenType
 from app.tokens import equal_sign_preceeder
 from app.tokens import ignore_tokens
 from app.tokens import string_literals
-from typing import List, Optional, Tuple
+from typing import List, Optional, Iterable
 
 
 ESCAPE_SEQUENCE = [r"\s", "\t", "\n"]
@@ -167,7 +167,7 @@ class Scanner:
         )
 
     def handel_identifiers(self, token_symbol: str) -> None:
-        """ IT handels identifiers and also the keywords  as they are related """
+        """IT handels identifiers and also the keywords  as they are related"""
         identifier = ""
         while True:
             if (
@@ -187,7 +187,7 @@ class Scanner:
             identifier += token_symbol
         else:
             self.row -= 1
-        token_name=TokenType.IDENTIFIER.name
+        token_name = TokenType.IDENTIFIER.name
         if identifier in KEYWORDS.keys():
             token_name = KEYWORDS[identifier].name
         return self.include_scanned_tokens(
@@ -206,7 +206,6 @@ class Scanner:
             token_name = TokenType(token_symbol).name
             self.row += 1
 
-
         elif token_symbol.isdigit():
             return self.handel_numeric_literals(token_symbol)
 
@@ -215,7 +214,7 @@ class Scanner:
 
         elif not TokenType.has_token_symbol(token_symbol):
             self.validate_ignoreable_token(token_symbol)
-            return 
+            return
 
         self.include_scanned_tokens(token_symbol, token_name, None)
 
@@ -235,7 +234,7 @@ class Scanner:
                 self.enquire_token_type(token_symbol)
             self.row += 1
 
-    def scan_tokens(self) -> Tuple[List[Token], ExitCode]:
+    def scan_tokens(self) -> List[Token]:
         while self.is_not_end_column():
             self.current_line = self.source[self.column]
             self.scan_individual_line()  # Second while loop
@@ -243,4 +242,4 @@ class Scanner:
             # Reset the row counter for the next line
             self.row = 0
         self.tokens.append(Token(TokenType("").name, "", None))
-        return self.tokens, self.exit_status
+        return self.tokens

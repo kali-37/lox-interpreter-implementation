@@ -74,12 +74,12 @@ class Token:
     def __init__(
         self, token_type: str, lexeme: str, literal: Optional[str] = None
     ) -> None:
-        self.token_type: str = token_type
-        self.lexeme: str = lexeme
-        self.literal: Optional[str] = literal if literal else "null"
+        self._token_type: str = token_type
+        self._lexeme: str = lexeme
+        self._literal: Optional[str] = literal if literal else "null"
 
     def __str__(self) -> str:
-        return f"{self.token_type} {self.lexeme} {self.literal}"
+        return f"{self._token_type} {self._lexeme} {self._literal}"
 
     def __repr__(self) -> str:
         return self.__str__()
