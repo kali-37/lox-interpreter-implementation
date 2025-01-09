@@ -5,7 +5,7 @@ from app.tokens import TokenType
 from app.tokens import equal_sign_preceeder
 from app.tokens import ignore_tokens
 from app.tokens import string_literals
-from typing import List, Optional, Iterable
+from typing import List, Optional
 
 
 ESCAPE_SEQUENCE = [r"\s", "\t", "\n"]
