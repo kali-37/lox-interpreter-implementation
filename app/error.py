@@ -1,6 +1,34 @@
 import sys
+from app.tokens import Token
+from app.tokens import TokenType
 
 # from app.logger import logging
+
+
+class ParseErro(RuntimeError):
+    pass
+
+
+class ParseError:
+    hadError = False
+    hadRuntimeError = False
+
+    @staticmethod
+    def error(tokenType: Token, message: str):
+        tokenType = tokenType
+        message = message
+        ParseError.hadError = True
+        if tokenType.token_type_ == TokenType.EOF:
+            print(
+                f"[line {tokenType.line}] Error at end: {message}",
+                file=sys.stderr,
+            )
+        else:
+            print(
+                f"[line {tokenType.line}] Error at '{tokenType.lexeme_}': {message}",
+                file=sys.stderr,
+            )
+        raise ParseErro()
 
 
 class LogError:

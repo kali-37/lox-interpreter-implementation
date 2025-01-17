@@ -106,6 +106,7 @@ class Scanner:
                 token_name if token_name else TokenType(token_symbol).name,
                 token_symbol,
                 literal if literal else None,
+                self.column+1,
             )
         )
 
@@ -241,5 +242,5 @@ class Scanner:
             self.column += 1
             # Reset the row counter for the next line
             self.row = 0
-        self.tokens.append(Token(TokenType("").name, "", None))
+        self.tokens.append(Token(TokenType("").name, "", None,self.column+1),)
         return self.tokens

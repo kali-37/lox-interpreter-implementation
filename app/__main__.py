@@ -10,6 +10,7 @@ from app.scanner import Scanner
 from app.tokens import Token
 from app.tokens import TokenType
 from app.parser import Parser
+from app.error import ParseError
 
 
 def parse_argument():
@@ -24,12 +25,15 @@ def parse_argument():
 
 
 def parse_file_content(file_contents: List[str]):
+    ParseError.hadError = False
+    ParseError.hadRuntimeError = False
     parsed_tokens = Parser(file_contents).parse()
-    for token in parsed_tokens:
-        if type(token).__name__ == "str":
-            print(repr(token)[1:-1])
-        else:
-            print(token)
+    if parsed_tokens:
+        print(parsed_tokens)
+    if ParseError.hadError:
+        exit(ExitCode.EX_DATAERR)
+    if ParseError.hadRuntimeError:
+        exit(ExitCode.EX_SOFTWARE)
 
 
 def scan_file_contents(file_contents: List[str]):
