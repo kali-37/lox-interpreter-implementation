@@ -6,6 +6,7 @@ from app.tokens import equal_sign_preceeder
 from app.tokens import ignore_tokens
 from app.tokens import string_literals
 from typing import List, Optional
+from typing import Union
 
 
 ESCAPE_SEQUENCE = [r"\s", "\t", "\n"]
@@ -99,14 +100,14 @@ class Scanner:
         self,
         token_symbol: str,
         token_name: str = "",
-        literal: Optional[str] = None,
+        literal: Optional[Union[str, int,float]] = None,
     ):
         self.tokens.append(
             Token(
                 token_name if token_name else TokenType(token_symbol).name,
                 token_symbol,
                 literal if literal else None,
-                self.column+1,
+                self.column + 1,
             )
         )
 
@@ -164,7 +165,7 @@ class Scanner:
         self.row -= 1
         stack_elem = stack.inner_elements
         return self.include_scanned_tokens(
-            stack_elem, TokenType.NUMBER.name, str(float(stack.inner_elements))
+            stack_elem, TokenType.NUMBER.name, float(stack.inner_elements)
         )
 
     def handel_identifiers(self, token_symbol: str) -> None:
@@ -242,5 +243,7 @@ class Scanner:
             self.column += 1
             # Reset the row counter for the next line
             self.row = 0
-        self.tokens.append(Token(TokenType("").name, "", None,self.column+1),)
+        self.tokens.append(
+            Token(TokenType("").name, "", None, self.column + 1),
+        )
         return self.tokens

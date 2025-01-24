@@ -56,6 +56,9 @@ class TokenType(Enum):
     VAR = "var"
     WHILE = "while"
 
+    def __str__(self) -> str:
+        return self.name
+
     @classmethod
     def has_token_symbol(cls, token_symbol: str) -> bool:
         return token_symbol in cls._value2member_map_
@@ -66,7 +69,7 @@ class TokenType(Enum):
             return cls(token_symbol).name
         return None
 
-    def __repr__(self) -> str:
+    def __repr__(self):
         return f"{self.name}"
 
 

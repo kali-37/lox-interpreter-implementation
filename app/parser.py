@@ -27,12 +27,10 @@ from app.tokens import Token
 from app.tokens import TokenType
 from app.expression import Expr
 from typing import List
-from app.expression import Group
-from app.expression import Unary
-from app.expression import Binary
-from app.expression import Literal
 from app.error import ParseError
 from app.scanner import Scanner
+from app.expression import Expression
+from app.statments import Stmt
 
 
 class Parser:
@@ -41,7 +39,7 @@ class Parser:
 
     def parse(self):
         try:
-            return self.expression()
+            return Stmt(self.expression())
         except RuntimeError as e:
             print(e)
             return
@@ -85,28 +83,28 @@ class Parser:
 
     def primary(self) -> Expr:
         if self.match(TokenType.FALSE):
-            return Literal(False)
+            return Expression.Literal(False)
 
         if self.match(TokenType.TRUE):
-            return Literal(True)
+            return Expression.Literal(True)
 
         if self.match(TokenType.NIL):
-            return Literal(None)
+            return Expression.Literal(None)
 
         if self.match(TokenType.NUMBER, TokenType.STRING):
-            return Literal(self.previous().literal_)
+            return Expression.Literal(self.previous().literal_)
 
         if self.match(TokenType.LEFT_PAREN):
             expr = self.expression()
             self.consume(TokenType.RIGHT_PAREN, "Expect ')' after expression.")
-            return Group(expr)
+            return Expression.Group(expr)
         raise ParseError.error(self.peek(), "Expect expression.")
 
     def unary(self) -> Expr:
         while self.match(TokenType.BANG, TokenType.MINUS):
             operator = self.previous()
             right = self.unary()
-            return Unary(operator, right)
+            return Expression.Unary(operator, right)
         return self.primary()
 
     def factor(self) -> Expr:
@@ -114,7 +112,7 @@ class Parser:
         while self.match(TokenType.SLASH, TokenType.STAR):
             operator = self.previous()
             right = self.unary()
-            expr = Binary(expr, operator, right)
+            expr = Expression.Binary(expr, operator, right)
         return expr
 
     def term(self) -> Expr:
@@ -122,7 +120,7 @@ class Parser:
         while self.match(TokenType.MINUS, TokenType.PLUS):
             operator = self.previous()
             right = self.factor()
-            expr = Binary(expr, operator, right)
+            expr =Expression.Binary(expr, operator, right)
         return expr
 
     def comparison(self):
@@ -135,7 +133,7 @@ class Parser:
         ):
             operator = self.previous()
             right = self.term()
-            expr = Binary(expr, operator, right)
+            expr = Expression.Binary(expr, operator, right)
         return expr
 
     def equality(self):
@@ -144,5 +142,5 @@ class Parser:
         while self.match(TokenType.BANG_EQUAL, TokenType.EQUAL_EQUAL):
             operator = self.previous()
             right = self.comparison()
-            expr = Binary(expr, operator, right)
+            expr = Expression.Binary(expr, operator, right)
         return expr
