@@ -120,7 +120,7 @@ class Parser:
         while self.match(TokenType.MINUS, TokenType.PLUS):
             operator = self.previous()
             right = self.factor()
-            expr =Expression.Binary(expr, operator, right)
+            expr = Expression.Binary(expr, operator, right)
         return expr
 
     def comparison(self):

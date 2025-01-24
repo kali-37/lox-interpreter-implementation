@@ -100,13 +100,13 @@ class Scanner:
         self,
         token_symbol: str,
         token_name: str = "",
-        literal: Optional[Union[str, int,float]] = None,
+        literal: Optional[Union[str, int, float]] = None,
     ):
         self.tokens.append(
             Token(
                 token_name if token_name else TokenType(token_symbol).name,
                 token_symbol,
-                literal if literal else None,
+                literal if isinstance(literal, (float, str)) else None,
                 self.column + 1,
             )
         )

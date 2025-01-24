@@ -24,7 +24,8 @@ def parse_argument():
     args = parser.parse_args()
     return args
 
-def parse_file_content(file_contents: List[str],evaluate:bool=False):
+
+def parse_file_content(file_contents: List[str], evaluate: bool = False):
     ParseError.hadError = False
     ParseError.hadRuntimeError = False
     parsed_tokens = Parser(file_contents).parse()
@@ -45,19 +46,18 @@ def scan_file_contents(file_contents: List[str]):
         print(lexeme)
     if obj.exit_status:
         exit(obj.exit_status.value)
-        
+
+
 def evaluate(file_contents: List[str]):
-    parsed_content= parse_file_content(file_contents,evaluate=True)
+    parsed_content = parse_file_content(file_contents, evaluate=True)
     if parsed_content:
         Interpreter().interpret(parsed_content)
-
-    ...
 
 
 def main(args: Namespace):
     logger.debug("Logs from your program will appear here!")
 
-    if args.action not in ["tokenize" , "parse","evaluate"]:
+    if args.action not in ["tokenize", "parse", "evaluate"]:
         logger.warning(f"Unknown command: {args.action}")
         exit(ExitCode.FAILURE)
 
@@ -70,7 +70,7 @@ def main(args: Namespace):
     if file_contents:
         if args.action == "parse":
             parse_file_content(file_contents)
-        elif args.action =="evaluate":
+        elif args.action == "evaluate":
             evaluate(file_contents)
         else:
             scan_file_contents(file_contents)

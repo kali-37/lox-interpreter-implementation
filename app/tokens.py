@@ -83,7 +83,9 @@ class Token:
     ) -> None:
         self.token_type_: TokenType = token_type
         self.lexeme_: str = lexeme
-        self.literal_: Optional[str] = literal if literal else "null"
+        self.literal_: Optional[str] = (
+            literal if isinstance(literal, (float, str)) else "null"
+        )
         self.line: int = line
 
     def __str__(self) -> str:

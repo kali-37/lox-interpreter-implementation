@@ -3,13 +3,44 @@ from app.expression import Expr
 from app.expression import Expression
 from app.statments import Stmt
 from typing import Any
-from typing import Optional, Union
+from typing import Optional
+from app.error import LuxRunTimeError
 
 
 class Interpreter(Expr):
+
+    def checkIfBinaryEval(self, left: Any, right: Any, operator: Any):
+        def checkNumberString(left: Any = left, right: Any = right):
+            if type(left) == float and type(right) == float:
+                return
+            raise LuxRunTimeError(operator, "Operands must be number.")
+
+        if operator in [
+            TokenType.MINUS.name,
+            TokenType.SLASH.name,
+            TokenType.STRING.name,
+            TokenType.GREATER.name,
+            TokenType.GREATER_EQUAL.name,
+            TokenType.LESS.name,
+            TokenType.LESS_EQUAL.name
+        ]:
+            return checkNumberString()
+        
+
+        if operator == TokenType.PLUS.name:
+            if (type(left) == float and type(right) == float) or (
+                type(left) == str and type(right) == str
+            ):
+                return
+            raise LuxRunTimeError(
+                operator, "Operands must be two numbers or two strings."
+            )
+
     def visitBinaryExpr(self, expr: Expression.Binary):
         left = self.evaluate(expr.left)
         right = self.evaluate(expr.right)
+        self.checkIfBinaryEval(left, right, expr.operator.token_type_)
+
         if expr.operator.token_type_ == TokenType.MINUS.name:
             return left - right
         elif expr.operator.token_type_ == TokenType.PLUS.name:
@@ -39,11 +70,15 @@ class Interpreter(Expr):
     def visitLiteralExpr(self, expr: Expression.Literal):
         return expr.value
 
+    def checkNumberOperand(self, operator: Any, operand: Any):
+        if type(operand) == float:
+            return
+        raise LuxRunTimeError(operator, "Operand must be a number.")
+
     def visitUnaryExpr(self, expr: Expression.Unary):
         right = self.evaluate(expr.right)
-        if self.is_digit(right):
-            right = self.is_digit(right, realType=True)
         if expr.operator.token_type_ == TokenType.MINUS.name:
+            self.checkNumberOperand(expr.operator, right)
             return -right
         elif expr.operator.token_type_ == TokenType.BANG.name:
             return not self.is_truthy(right)

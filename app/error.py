@@ -1,12 +1,19 @@
 import sys
 from app.tokens import Token
 from app.tokens import TokenType
+from typing import Any
 
 # from app.logger import logging
 
 
 class ParseErro(RuntimeError):
     pass
+
+
+class LuxRunTimeError(RuntimeError):
+    def __init__(self, token: Any, errno: str):
+        super().__init__(errno)
+        self.token = token
 
 
 class ParseError:
