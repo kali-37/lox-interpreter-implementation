@@ -11,12 +11,12 @@ class ParseErro(RuntimeError):
 
 
 class LuxRunTimeError(RuntimeError):
-    def __init__(self, token: Any, errno: str):
+    def __init__(self, token: Token, errno: str):
         super().__init__(errno)
         self.token = token
 
 
-class ParseError:
+class LoxError:
     hadError = False
     hadRuntimeError = False
 
@@ -24,7 +24,7 @@ class ParseError:
     def error(tokenType: Token, message: str):
         tokenType = tokenType
         message = message
-        ParseError.hadError = True
+        LoxError.hadError = True
         if tokenType.token_type_ == TokenType.EOF:
             print(
                 f"[line {tokenType.line}] Error at end: {message}",
@@ -36,6 +36,13 @@ class ParseError:
                 file=sys.stderr,
             )
         raise ParseErro()
+    
+    @staticmethod
+    def runtimeError(error: RuntimeError) -> None:
+        if (type(error) == LuxRunTimeError):
+            print(str(error) + "\n[line " + str(error.token.line) + "]", file=sys.stderr)
+        LoxError.hadRuntimeError = True
+
 
 
 class LogError:

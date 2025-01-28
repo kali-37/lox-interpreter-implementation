@@ -27,7 +27,7 @@ from app.tokens import Token
 from app.tokens import TokenType
 from app.expression import Expr
 from typing import List
-from app.error import ParseError
+from app.error import LoxError
 from app.scanner import Scanner
 from app.expression import Expression
 from app.statments import Stmt
@@ -67,7 +67,7 @@ class Parser:
     def consume(self, type: TokenType, message: str):
         if self.check(type):
             return self.advance()
-        ParseError.error(self.peek(), message)
+        LoxError.error(self.peek(), message)
 
     def advance(self) -> Token:
         if not self.is_at_end():
@@ -98,7 +98,7 @@ class Parser:
             expr = self.expression()
             self.consume(TokenType.RIGHT_PAREN, "Expect ')' after expression.")
             return Expression.Group(expr)
-        raise ParseError.error(self.peek(), "Expect expression.")
+        raise LoxError.error(self.peek(), "Expect expression.")
 
     def unary(self) -> Expr:
         while self.match(TokenType.BANG, TokenType.MINUS):

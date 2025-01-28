@@ -10,7 +10,7 @@ from app.scanner import Scanner
 from app.tokens import Token
 from app.tokens import TokenType
 from app.parser import Parser
-from app.error import ParseError
+from app.error import LoxError
 from app.interpreter import Interpreter
 
 
@@ -26,16 +26,16 @@ def parse_argument():
 
 
 def parse_file_content(file_contents: List[str], evaluate: bool = False):
-    ParseError.hadError = False
-    ParseError.hadRuntimeError = False
+    LoxError.hadError = False
+    LoxError.hadRuntimeError = False
     parsed_tokens = Parser(file_contents).parse()
     if evaluate:
         return parsed_tokens
     if parsed_tokens:
         print(parsed_tokens)
-    if ParseError.hadError:
+    if LoxError.hadError:
         exit(ExitCode.EX_DATAERR)
-    if ParseError.hadRuntimeError:
+    if LoxError.hadRuntimeError:
         exit(ExitCode.EX_SOFTWARE)
 
 
@@ -49,9 +49,12 @@ def scan_file_contents(file_contents: List[str]):
 
 
 def evaluate(file_contents: List[str]):
+    LoxError.hadRuntimeError=False
     parsed_content = parse_file_content(file_contents, evaluate=True)
     if parsed_content:
         Interpreter().interpret(parsed_content)
+    if LoxError.hadRuntimeError:
+        exit(ExitCode.EX_SOFTWARE)
 
 
 def main(args: Namespace):

@@ -4,20 +4,26 @@ from app.expression import Expression
 from app.statments import Stmt
 from typing import Any
 from typing import Optional
-from app.error import LuxRunTimeError
+from app.error import LoxError, LuxRunTimeError
+from app.scanner import Token
 
 
 class Interpreter(Expr):
 
-    def checkIfBinaryEval(self, left: Any, right: Any, operator: Any):
+    def checkIfBinaryEval(self, left: Any, right: Any, operator:Token):
         def checkNumberString(left: Any = left, right: Any = right):
             if type(left) == float and type(right) == float:
                 return
+            if type(left) == str and type(right) == str and operator.token_type_ == TokenType.PLUS.name:
+                return
             raise LuxRunTimeError(operator, "Operands must be number.")
 
-        if operator in [
+        if operator.token_type_ in [
+            TokenType.MINUS.name,
+            TokenType.PLUS.name,
             TokenType.MINUS.name,
             TokenType.SLASH.name,
+            TokenType.STAR.name,
             TokenType.STRING.name,
             TokenType.GREATER.name,
             TokenType.GREATER_EQUAL.name,
@@ -39,7 +45,7 @@ class Interpreter(Expr):
     def visitBinaryExpr(self, expr: Expression.Binary):
         left = self.evaluate(expr.left)
         right = self.evaluate(expr.right)
-        self.checkIfBinaryEval(left, right, expr.operator.token_type_)
+        self.checkIfBinaryEval(left, right, expr.operator)
 
         if expr.operator.token_type_ == TokenType.MINUS.name:
             return left - right
@@ -70,7 +76,7 @@ class Interpreter(Expr):
     def visitLiteralExpr(self, expr: Expression.Literal):
         return expr.value
 
-    def checkNumberOperand(self, operator: Any, operand: Any):
+    def checkNumberOperand(self, operator:Token, operand: Any):
         if type(operand) == float:
             return
         raise LuxRunTimeError(operator, "Operand must be a number.")
@@ -126,7 +132,11 @@ class Interpreter(Expr):
         return str(obj)
 
     def execute(self, statment: Stmt):
-        print(self.stringify(self.evaluate(statment.expression)))
+        try:
+            print(self.stringify(self.evaluate(statment.expression)))
+        except LuxRunTimeError as error:
+            LoxError.runtimeError(error)
 
     def interpret(self, statment: Stmt):
         self.execute(statment)
+
